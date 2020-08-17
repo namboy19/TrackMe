@@ -27,14 +27,22 @@ class TrackService : Service() {
 
     private val locationList = mutableListOf<TrackLocation>()
     private var counter = 0
-    private val client: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
+    private val client: FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(
+            this
+        )
+    }
 
     var locationUpdateCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val location: Location = locationResult.getLastLocation()
             if (location != null) {
 
-                var trackLocation = TrackLocation(location.latitude, location.longitude, Calendar.getInstance().timeInMillis)
+                var trackLocation = TrackLocation(
+                    location.latitude,
+                    location.longitude,
+                    Calendar.getInstance().timeInMillis
+                )
                 locationList.add(trackLocation)
                 Log.d("Location Service", "location update $location")
 
@@ -93,17 +101,14 @@ class TrackService : Service() {
         }
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        TrackMeApplication.isTrackServiceRunning=true
-    }
-
     fun createChannel(context: Context) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            val notificationChannel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+            val notificationChannel =
+                NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
             notificationChannel.enableVibration(true)
             notificationChannel.setShowBadge(true)
             notificationChannel.enableLights(true)
@@ -124,30 +129,35 @@ class TrackService : Service() {
 
         var mNotification: Notification
 
-        val pendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent =
+            PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             mNotification = Notification.Builder(context, CHANNEL_ID)
-                    // Set the intent that will fire when the user taps the notification
-                    .setContentIntent(pendingIntent)
-                    .setSmallIcon(com.namboy.trackme.R.drawable.ic_baseline_pause_24)
-                    .setAutoCancel(true)
-                    .setContentTitle("TrackMe")
-                    .setStyle(Notification.BigTextStyle()
-                            .bigText("TrackMe is running"))
-                    .setContentText("TrackMe is running").build()
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(com.namboy.trackme.R.drawable.ic_baseline_pause_24)
+                .setAutoCancel(true)
+                .setContentTitle("TrackMe")
+                .setStyle(
+                    Notification.BigTextStyle()
+                        .bigText("TrackMe is running")
+                )
+                .setContentText("TrackMe is running").build()
         } else {
             mNotification = Notification.Builder(context)
-                    // Set the intent that will fire when the user taps the notification
-                    .setContentIntent(pendingIntent)
-                    .setSmallIcon(com.namboy.trackme.R.drawable.ic_baseline_pause_24)
-                    .setAutoCancel(true)
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setContentTitle("TrackMe")
-                    .setStyle(Notification.BigTextStyle()
-                            .bigText("TrackMe is running"))
-                    .setContentText("TrackMe is running").build()
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(com.namboy.trackme.R.drawable.ic_baseline_pause_24)
+                .setAutoCancel(true)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setContentTitle("TrackMe")
+                .setStyle(
+                    Notification.BigTextStyle()
+                        .bigText("TrackMe is running")
+                )
+                .setContentText("TrackMe is running").build()
 
         }
 
@@ -157,13 +167,13 @@ class TrackService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        if (intent?.action== ACTION_START_SERVICE){
+        if (intent?.action == ACTION_START_SERVICE) {
             val intent = Intent(INTENT_TRACK_SERVICE)
-            intent.putExtra(KEY_TRACK_SESSION, TrackSession(Gson().toJson(locationList),counter))
+            intent.putExtra(KEY_TRACK_SESSION, TrackSession(Gson().toJson(locationList), counter))
             LocalBroadcastManager.getInstance(this@TrackService).sendBroadcast(intent)
         }
 
-        if (mCurrentCommand!=intent?.action){
+        if (mCurrentCommand != intent?.action) {
             when (intent?.action) {
                 ACTION_START_SERVICE -> {
                     startTimer()
@@ -178,7 +188,7 @@ class TrackService : Service() {
                     startTimer()
                     requestLocationUpdates()
                 }
-                ACTION_STOP_SERVICE->{
+                ACTION_STOP_SERVICE -> {
                     stoptimertask()
                     client.removeLocationUpdates(locationUpdateCallback)
                     stopSelf()
@@ -186,19 +196,23 @@ class TrackService : Service() {
             }
         }
 
+        mCurrentCommand = intent?.action ?: ""
+
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        TrackMeApplication.isTrackServiceRunning=false
         stoptimertask()
         client.removeLocationUpdates(locationUpdateCallback)
 
-        if (mCurrentCommand!=ACTION_STOP_SERVICE){
-            TrackMeApplication.appPreferences.saveString(AppPreferences.PREFS_CURRENT_SESSION,
-                Gson().toJson(TrackSession(Gson().toJson(locationList),counter)))
-        }
+        //handle case service destroy by system
+        /*if (mCurrentCommand != ACTION_STOP_SERVICE) {
+            TrackMeApplication.appPreferences.saveString(
+                AppPreferences.PREFS_CURRENT_SESSION,
+                Gson().toJson(TrackSession(Gson().toJson(locationList), counter))
+            )
+        }*/
 
         /*val broadcastIntent = Intent()
         broadcastIntent.action = "restartservice"
@@ -239,7 +253,8 @@ class TrackService : Service() {
         request.setSmallestDisplacement(1f)
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
 
-        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        val permission =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (permission == PackageManager.PERMISSION_GRANTED) { // Request location updates and when an update is
             // received, store the location in Firebase
             client.requestLocationUpdates(request, locationUpdateCallback, null)

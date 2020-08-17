@@ -37,7 +37,7 @@ class MainActivity : BaseLifecycleActivity<MainViewModel>() {
     }
 
     fun checkSessionExist() {
-        if ((getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.activeNotifications?.filter { it.id==TrackService.NOTI_SERVICE_ID }?.isNotEmpty()==true){
+        if (TrackService.mCurrentCommand.isNotEmpty()){
             backStack.addFragment(RecordFragment.newInstance(true))
         }
 
