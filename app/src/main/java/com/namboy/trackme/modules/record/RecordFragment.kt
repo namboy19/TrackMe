@@ -91,17 +91,18 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
     fun handleDisplayLocation() {
 
         viewModel.locationList.value?.let {
-            if (mCurrLocationMarker == null && it.size > 0) {
-                //Place current location marker
-                val latLng = LatLng(it.get(0)?.lat, it.get(0).lng)
-                val markerOptions = MarkerOptions()
-                markerOptions.position(latLng)
-                markerOptions.title("Current Position")
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                mCurrLocationMarker = mGoogleMap.addMarker(markerOptions)
-
+            if (it.size>0){
+                if (mCurrLocationMarker == null) {
+                    //Place current location marker
+                    val latLng = LatLng(it.get(0)?.lat, it.get(0).lng)
+                    val markerOptions = MarkerOptions()
+                    markerOptions.position(latLng)
+                    markerOptions.title("Current Position")
+                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                    mCurrLocationMarker = mGoogleMap.addMarker(markerOptions)
+                }
                 //move map camera
-                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0F))
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it.last().getLatLng(), 17.0F))
             }
         }
 
