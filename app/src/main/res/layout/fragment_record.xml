@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    tools:context=".modules.record.RecordFragment">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/fr_guideline_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="20dp" />
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/fr_tv_distance" />
+
+    <TextView
+        android:id="@+id/fr_tv_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/fr_br_bottom"
+        app:layout_constraintEnd_toStartOf="@+id/fr_tv_speed"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="-- Km \n Distance" />
+
+    <TextView
+        android:id="@+id/fr_tv_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/fr_br_bottom"
+        app:layout_constraintEnd_toStartOf="@+id/fr_tv_distance"
+        app:layout_constraintStart_toEndOf="@+id/fr_tv_time"
+        tools:text="-- Km/h \n Speed" />
+
+    <TextView
+        android:id="@+id/fr_tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/fr_br_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/fr_tv_speed"
+        android:text="00:00:00" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/fr_br_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="fr_imv_pause,fr_imv_refresh,fr_imv_stop" />
+
+    <ImageView
+        android:id="@+id/fr_imv_pause"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/fr_guideline_bottom"
+        app:layout_constraintEnd_toStartOf="@+id/fr_imv_refresh"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_baseline_pause_24" />
+
+    <ImageView
+        android:id="@+id/fr_imv_refresh"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/fr_guideline_bottom"
+        app:layout_constraintEnd_toStartOf="@+id/fr_imv_stop"
+        app:layout_constraintStart_toEndOf="@+id/fr_imv_pause"
+        app:srcCompat="@drawable/ic_baseline_refresh_24"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/fr_imv_stop"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/fr_guideline_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/fr_imv_refresh"
+        app:srcCompat="@drawable/ic_baseline_stop_24" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

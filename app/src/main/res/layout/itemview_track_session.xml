@@ -1,0 +1,51 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorWhite"
+    android:paddingBottom="10dp"
+    tools:context=".modules.record.RecordFragment">
+    
+    <ImageView
+        android:id="@+id/its_imv_snapshot"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginBottom="25dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/its_tv_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/its_imv_snapshot"
+        app:layout_constraintEnd_toStartOf="@+id/its_tv_speed"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="-- Km \n Distance" />
+
+    <TextView
+        android:id="@+id/its_tv_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/its_imv_snapshot"
+        app:layout_constraintEnd_toStartOf="@+id/its_tv_distance"
+        app:layout_constraintStart_toEndOf="@+id/its_tv_time"
+        tools:text="-- Km/h \n Speed" />
+
+    <TextView
+        android:id="@+id/its_tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/its_imv_snapshot"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/its_tv_speed"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="00:00:00" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

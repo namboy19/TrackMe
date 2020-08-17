@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">TrackMe</string>
+    <string name="alert">Alert</string>
+    <string name="ok">Ok</string>
+
+    <string name="distance_number">%s Km \n Distance</string>
+    <string name="speed_number">%d Km/h \n Speed</string>
+    <string name="average_speed_number">%d Km/h \n Avg Speed</string>
+    <string name="location_permission_require">This app needs permission, please accept to use location functionality</string>
+
+</resources>
