@@ -32,13 +32,13 @@ class MainActivity : BaseLifecycleActivity<MainViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        backStack.addFragment(HistoryFragment())
+        backStack.switchFragment(HistoryFragment())
         checkPermission()
     }
 
     fun checkSessionExist() {
         if (TrackService.mCurrentCommand.isNotEmpty()){
-            backStack.addFragment(RecordFragment.newInstance(true))
+            backStack.switchFragment(RecordFragment.newInstance())
         }
 
         //handle case stop by system os

@@ -50,7 +50,6 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
     private lateinit var mGoogleMap: GoogleMap
     private var mPolyline: Polyline? = null
     private var mCurrLocationMarker: Marker? = null
-    private var mIsResume = false
 
     private val mMapCallback = OnMapReadyCallback { googleMap ->
 
@@ -83,15 +82,12 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
     }
 
     companion object {
-        fun newInstance(isResume: Boolean = false) = RecordFragment().apply {
-            this.mIsResume = isResume
-        }
+        fun newInstance() = RecordFragment()
     }
 
     fun handleDisplayLocation() {
-
         viewModel.locationList.value?.let {
-            if (it.size>0){
+            if (it.size > 0) {
                 if (mCurrLocationMarker == null) {
                     //Place current location marker
                     val latLng = LatLng(it.get(0)?.lat, it.get(0).lng)
@@ -102,12 +98,17 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
                     mCurrLocationMarker = mGoogleMap.addMarker(markerOptions)
                 }
                 //move map camera
-                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it.last().getLatLng(), 17.0F))
+                mGoogleMap.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        it.last().getLatLng(),
+                        17.0F
+                    )
+                )
+
+                rawPolyline(viewModel.locationList.value?.map { it.getLatLng() } ?: mutableListOf())
+                viewModel.calculateDistanceAndSpeed()
             }
         }
-
-        rawPolyline(viewModel.locationList.value?.map { it.getLatLng() } ?: mutableListOf())
-        viewModel.calculateDistanceAndSpeed()
     }
 
     override fun onCreateView(
@@ -119,32 +120,50 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(mMapCallback)
 
         fr_imv_pause.setOnClickListener {
-            TrackService.pauseService(requireContext())
+            TrackService.requestService(requireContext(), TrackService.ACTION_PAUSE_SERVICE)
             fr_imv_pause.visibility = GONE
             fr_imv_refresh.visibility = VISIBLE
-            //stopListenService()
         }
 
         fr_imv_refresh.setOnClickListener {
-            TrackService.resumeService(requireContext())
+            TrackService.requestService(requireContext(), TrackService.ACTION_RESUME_SERVICE)
             fr_imv_pause.visibility = VISIBLE
             fr_imv_refresh.visibility = GONE
-            //startListenService()
         }
 
         fr_imv_stop.setOnClickListener {
             snapshot()
         }
+
+        when (TrackService.mCurrentCommand) {
+            TrackService.ACTION_START_SERVICE, TrackService.ACTION_RESUME_SERVICE -> {
+                fr_imv_pause.visibility = VISIBLE
+                fr_imv_refresh.visibility = GONE
+            }
+
+            TrackService.ACTION_PAUSE_SERVICE -> {
+                fr_imv_pause.visibility = GONE
+                fr_imv_refresh.visibility = VISIBLE
+            }
+        }
     }
 
     fun snapshot() {
         var POLYGON_PADDING_PREFERENCE = 350
-        var latLngBounds = getPolygonLatLngBounds(viewModel.locationList.value?.map { it.getLatLng() } ?: mutableListOf())
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, POLYGON_PADDING_PREFERENCE))
+        var latLngBounds =
+            getPolygonLatLngBounds(viewModel.locationList.value?.map { it.getLatLng() }
+                ?: mutableListOf())
+        mGoogleMap.moveCamera(
+            CameraUpdateFactory.newLatLngBounds(
+                latLngBounds,
+                POLYGON_PADDING_PREFERENCE
+            )
+        )
 
         showLoading(true)
         Handler().postDelayed({
@@ -153,14 +172,17 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
             mGoogleMap?.snapshot { bitmap ->
                 FileUtils.saveBitmap(requireContext(), bitmap) {
                     it?.let {
-                        TrackService.stopService(requireContext())
+                        TrackService.requestService(
+                            requireContext(),
+                            TrackService.ACTION_STOP_SERVICE
+                        )
                         viewModel.saveSession(it) {
                             goBack()
                         }
                     }
                 }
             }
-        },500)
+        }, 500)
     }
 
     fun startLocationService() {
@@ -169,7 +191,14 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             mGoogleMap.setMyLocationEnabled(true)
-            TrackService.startService(requireContext())
+
+            if (viewModel.locationList.value?.isEmpty()==true && TrackService.mCurrentCommand.isNotEmpty()) {
+                TrackService.requestService(requireContext(), TrackService.ACTION_REQUEST_DATA)
+            }
+
+            if (TrackService.mCurrentCommand.isEmpty()) {
+                TrackService.requestService(requireContext(), TrackService.ACTION_START_SERVICE)
+            }
         }
     }
 
@@ -240,12 +269,18 @@ class RecordFragment : BaseLifecycleFragment<RecordViewModel>() {
             .check()
     }
 
-    private fun getPolygonLatLngBounds(polygon: List<LatLng>): LatLngBounds {
-        val centerBuilder = LatLngBounds.builder()
-        for (point in polygon) {
-            centerBuilder.include(point)
+    private fun getPolygonLatLngBounds(polygon: List<LatLng>): LatLngBounds? {
+        try {
+            val centerBuilder = LatLngBounds.builder()
+            for (point in polygon) {
+                centerBuilder.include(point)
+            }
+            return centerBuilder.build()
         }
-        return centerBuilder.build()
+        catch (ex:Exception){
+            ex.printStackTrace()
+            return null
+        }
     }
 
     override fun onAttach(context: Context) {

@@ -66,38 +66,21 @@ class TrackService : Service() {
 
         val INTENT_TRACK_SERVICE = "INTENT_TRACK_SERVICE"
 
+        val ACTION_REQUEST_DATA = "ACTION_REQUEST_DATA"
         val ACTION_START_SERVICE = "ACTION_START_SERVICE"
         val ACTION_PAUSE_SERVICE = "ACTION_PAUSE_SERVICE"
         val ACTION_RESUME_SERVICE = "ACTION_RESUME_SERVICE"
         val ACTION_STOP_SERVICE = "ACTION_STOP_SERVICE"
 
-        fun startService(context: Context) {
+        fun requestService(context: Context, action: String) {
             val startIntent = Intent(context, TrackService::class.java)
-            startIntent.action = ACTION_START_SERVICE
+            startIntent.action = action
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(startIntent)
             } else {
                 context.startService(startIntent)
             }
-        }
-
-        fun stopService(context: Context) {
-            val intent = Intent(context, TrackService::class.java)
-            intent.action = ACTION_STOP_SERVICE
-            context.startService(intent)
-        }
-
-        fun pauseService(context: Context) {
-            val pauseIntent = Intent(context, TrackService::class.java)
-            pauseIntent.action = ACTION_PAUSE_SERVICE
-            context.startService(pauseIntent)
-        }
-
-        fun resumeService(context: Context) {
-            val intent = Intent(context, TrackService::class.java)
-            intent.action = ACTION_RESUME_SERVICE
-            context.startService(intent)
         }
     }
 
@@ -167,7 +150,7 @@ class TrackService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        if (intent?.action == ACTION_START_SERVICE) {
+        if (intent?.action == ACTION_REQUEST_DATA) {
             val intent = Intent(INTENT_TRACK_SERVICE)
             intent.putExtra(KEY_TRACK_SESSION, TrackSession(Gson().toJson(locationList), counter))
             LocalBroadcastManager.getInstance(this@TrackService).sendBroadcast(intent)
@@ -205,6 +188,7 @@ class TrackService : Service() {
         super.onDestroy()
         stoptimertask()
         client.removeLocationUpdates(locationUpdateCallback)
+        mCurrentCommand=""
 
         //handle case service destroy by system
         /*if (mCurrentCommand != ACTION_STOP_SERVICE) {

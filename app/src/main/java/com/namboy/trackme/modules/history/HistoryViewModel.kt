@@ -14,10 +14,6 @@ class HistoryViewModel(application: Application) : BaseViewModel(application) {
 
     private val limit = 10
 
-    init {
-        loadData()
-    }
-
     fun loadData() {
         trackSessionList.clear()
         launch {

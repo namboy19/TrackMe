@@ -39,16 +39,22 @@ class HistoryFragment : BaseLifecycleFragment<HistoryViewModel>() {
         super.onViewCreated(view, savedInstanceState)
 
         fh_imv_record.setOnClickListener {
-            (activity as? BaseActivity)?.backStack?.addFragment(RecordFragment())
+            (activity as? BaseActivity)?.backStack?.switchFragment(RecordFragment())
         }
 
         initRecyclerView()
 
         fh_refresh.setOnRefreshListener {
-            endlessScrollView.resetState()
             fh_refresh.isRefreshing = false
-            viewModel.loadData()
+            reloadData()
         }
+
+        reloadData()
+    }
+
+    fun reloadData() {
+        endlessScrollView.resetState()
+        viewModel.loadData()
     }
 
     fun initRecyclerView() {
@@ -61,23 +67,23 @@ class HistoryFragment : BaseLifecycleFragment<HistoryViewModel>() {
             }
         }
         fh_listHistory.addOnScrollListener(endlessScrollView)
+
+        if (mAdapter == null) {
+            mAdapter = HistoryAdapter(mutableListOf())
+        }
+        fh_listHistory.adapter = mAdapter
     }
 
     override fun observeLiveData() {
         super.observeLiveData()
 
-        viewModel.trackSessionLiveData.observe(this, Observer {
-            if (mAdapter == null) {
-                mAdapter = HistoryAdapter(it.second)
-                fh_listHistory.adapter = mAdapter
+        viewModel.trackSessionLiveData.observe(viewLifecycleOwner, Observer {
+            if (it.first) {
+                mAdapter?.listTrackSession = it.second
+                mAdapter?.notifyDataSetChanged()
             } else {
-                if (it.first) {
-                    mAdapter?.listTrackSession = it.second
-                    mAdapter?.notifyDataSetChanged()
-                } else {
-                    mAdapter?.listTrackSession?.addAll(it.second)
-                    mAdapter?.notifyDataSetChanged()
-                }
+                mAdapter?.listTrackSession?.addAll(it.second)
+                mAdapter?.notifyDataSetChanged()
             }
         })
     }

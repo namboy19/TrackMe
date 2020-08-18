@@ -16,6 +16,16 @@ class FragmentBackStack(val fragmentManager: FragmentManager, protected val layo
         fragmentManager.executePendingTransactions()
     }
 
+    fun switchFragment(fragment : BaseFragment){
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        currentFragment = fragment
+        fragmentTransaction.replace(layoutResId, fragment, fragment.tagName)
+            .addToBackStack(fragment.tagName)
+            .commitAllowingStateLoss()
+        //after transaction you must call the executePendingTransaction
+        fragmentManager.executePendingTransactions()
+    }
+
     fun replaceFragment(fragment : BaseFragment){
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction

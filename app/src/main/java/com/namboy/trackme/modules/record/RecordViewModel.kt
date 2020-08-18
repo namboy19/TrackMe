@@ -26,6 +26,7 @@ class RecordViewModel(application: Application) : BaseViewModel(application) {
     init {
         distance.value = 0f
         speed.value = 0
+        locationList.value= mutableListOf()
     }
 
     fun addTrackLocation(trackLocation: TrackLocation){
